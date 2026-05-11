@@ -43,6 +43,8 @@ class RegistroRequestValidationTest {
         ReflectionTestUtils.setField(request, "correo", "");
 
         assertTieneViolacionEnCampo(validator.validate(request), "correo");
+        System.out.println("=== CP-REG-02 RESULTADO OBTENIDO ===");
+        System.out.println("Error: " + validator.validate(request).iterator().next().getMessage());
     }
 
     @Test
@@ -52,6 +54,8 @@ class RegistroRequestValidationTest {
         ReflectionTestUtils.setField(request, "correo", "juan.gmail.com");
 
         assertTieneViolacionEnCampo(validator.validate(request), "correo");
+        System.out.println("=== CP-REG-05 RESULTADO OBTENIDO ===");
+        System.out.println("Error: " + validator.validate(request).iterator().next().getMessage());
     }
 
     @ParameterizedTest(name = "CP-REG-{0}: contrasena de {1} caracteres debe ser {2}")
@@ -71,6 +75,12 @@ class RegistroRequestValidationTest {
         } else {
             assertSinViolacionEnCampo(validator.validate(request), "contrasena");
         }
+        System.out.println("=== CP-REG-" + caseId + " RESULTADO OBTENIDO ===");
+        if ("invalida".equals(expectedOutcome)) {
+            System.out.println("Error: " + validator.validate(request).iterator().next().getMessage());
+        } else {
+            System.out.println("Registro exitoso con contraseña de longitud " + length + " para usuario " + request.getCorreo());
+        }
     }
 
     @Test
@@ -79,6 +89,8 @@ class RegistroRequestValidationTest {
         RegistroRequest request = registroRequestValido("abc123#@");
 
         assertTieneViolacionEnCampo(validator.validate(request), "contrasena");
+        System.out.println("=== CP-REG-13 RESULTADO OBTENIDO ===");
+        System.out.println("Error: " + validator.validate(request).iterator().next().getMessage());
     }
 
     @Test
@@ -87,6 +99,8 @@ class RegistroRequestValidationTest {
         RegistroRequest request = registroRequestValido("Abc12345");
 
         assertTieneViolacionEnCampo(validator.validate(request), "contrasena");
+        System.out.println("=== CP-REG-14 RESULTADO OBTENIDO ===");
+        System.out.println("Error: " + validator.validate(request).iterator().next().getMessage());
     }
 
     @Test
@@ -96,6 +110,8 @@ class RegistroRequestValidationTest {
         ReflectionTestUtils.setField(request, "correo", "test.com");
 
         assertTieneViolacionEnCampo(validator.validate(request), "correo");
+        System.out.println("=== CP-UPD-02 RESULTADO OBTENIDO ===");
+        System.out.println("Error: " + validator.validate(request).iterator().next().getMessage());
     }
 
     @Test
@@ -105,6 +121,8 @@ class RegistroRequestValidationTest {
         ReflectionTestUtils.setField(request, "nombre", "");
 
         assertTieneViolacionEnCampo(validator.validate(request), "nombre");
+        System.out.println("=== CP-UPD-03 RESULTADO OBTENIDO ===");
+        System.out.println("Error: " + validator.validate(request).iterator().next().getMessage());
     }
 
     private static RegistroRequest registroRequestValido(String contrasena) {

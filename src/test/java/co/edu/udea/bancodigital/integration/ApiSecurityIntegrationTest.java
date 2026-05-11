@@ -7,6 +7,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.math.BigDecimal;
@@ -177,14 +178,17 @@ class ApiSecurityIntegrationTest {
     @DisplayName("Integracion CP-ADM-03: cliente no puede consultar admin")
     void listarClientesComoCliente_deberiaRetornarForbidden() throws Exception {
         mockMvc.perform(get("/api/v1/admin/clientes"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errorCode").value("ACCESS_DENIED"))
+                .andExpect(jsonPath("$.message").value("Acceso denegado"));
     }
 
     @Test
-    @DisplayName("Integracion CP-ADM-04: usuario sin autenticacion no puede consultar admin")
-    void listarClientesSinAutenticacion_deberiaRetornarForbidden() throws Exception {
-        mockMvc.perform(get("/api/v1/admin/clientes"))
-                .andExpect(status().isForbidden());
+    @DisplayName("Integracion CP-ADMC-04: usuario sin autenticacion es redirigido al login")
+    void listarClientesSinAutenticacion_deberiaRedirigirALogin() throws Exception {
+        mockMvc.perform(get("/api/v1/admin/clientes").accept(MediaType.TEXT_HTML))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
     }
 
     @Test
@@ -238,10 +242,11 @@ class ApiSecurityIntegrationTest {
     }
 
     @Test
-    @DisplayName("Integracion CP-ACC-02: usuario sin autenticacion no puede consultar cuentas")
-    void consultarMisCuentasSinAutenticacion_deberiaRetornarForbidden() throws Exception {
-        mockMvc.perform(get("/api/v1/cuentas/me"))
-                .andExpect(status().isForbidden());
+    @DisplayName("Integracion CP-ACC-02: usuario sin autenticacion es redirigido al login")
+    void consultarMisCuentasSinAutenticacion_deberiaRedirigirALogin() throws Exception {
+        mockMvc.perform(get("/api/v1/cuentas/me").accept(MediaType.TEXT_HTML))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
     }
 
     @Test
@@ -263,9 +268,10 @@ class ApiSecurityIntegrationTest {
     }
 
     @Test
-    @DisplayName("Integracion CP-CSD-03: usuario sin autenticacion no puede consultar saldo")
-    void consultarSaldoSinAutenticacion_deberiaRetornarForbidden() throws Exception {
-        mockMvc.perform(get("/api/v1/cuentas/{idCuenta}/saldo", UUID.randomUUID()))
-                .andExpect(status().isForbidden());
+    @DisplayName("Integracion CP-CSD-03: usuario sin autenticacion es redirigido al login")
+    void consultarSaldoSinAutenticacion_deberiaRedirigirALogin() throws Exception {
+        mockMvc.perform(get("/api/v1/cuentas/{idCuenta}/saldo", UUID.randomUUID()).accept(MediaType.TEXT_HTML))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
     }
 }

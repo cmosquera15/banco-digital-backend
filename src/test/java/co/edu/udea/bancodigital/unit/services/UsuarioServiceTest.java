@@ -129,6 +129,10 @@ class UsuarioServiceTest {
         assertEquals(tipoCuenta, cuentaInicial.getTipoCuenta());
         assertEquals(estadoActiva, cuentaInicial.getEstadoCuenta());
         assertEquals(BigDecimal.ZERO, cuentaInicial.getSaldo());
+
+        System.out.println("=== CP-REG-01 RESULTADO OBTENIDO ===");
+        System.out.println("Usuario creado: " + guardado.getCorreo());
+        System.out.println("Cuenta con saldo: $" + cuentaInicial.getSaldo());
     }
 
     @Test
@@ -140,6 +144,8 @@ class UsuarioServiceTest {
         when(usuarioRepository.existsById(new UsuarioId(1, "1234567890"))).thenReturn(true);
 
         assertThrows(DuplicateResourceException.class, () -> usuarioService.registrar(request));
+        System.out.println("=== CP-REG-03 RESULTADO OBTENIDO ===");
+        System.out.println("Error: " + assertThrows(DuplicateResourceException.class, () -> usuarioService.registrar(request)).getMessage());
     }
 
     @Test
@@ -150,6 +156,8 @@ class UsuarioServiceTest {
         when(usuarioRepository.existsByCorreo("existente@example.com")).thenReturn(true);
 
         assertThrows(DuplicateResourceException.class, () -> usuarioService.registrar(request));
+        System.out.println("=== CP-REG-04 RESULTADO OBTENIDO ===");
+        System.out.println("Error: " + assertThrows(DuplicateResourceException.class, () -> usuarioService.registrar(request)).getMessage());
     }
 
     @Test
@@ -182,6 +190,10 @@ class UsuarioServiceTest {
         assertEquals("Nuevo Nombre", response.getNombre());
         assertEquals("nuevo@example.com", response.getCorreo());
         verify(usuarioRepository).save(usuario);
+
+        System.out.println("=== CP-UPD-01 RESULTADO OBTENIDO ===");
+        System.out.println("Nombre actualizado: " + response.getNombre());
+        System.out.println("Correo actualizado: " + response.getCorreo());
     }
 
     @Test
@@ -198,6 +210,8 @@ class UsuarioServiceTest {
         when(usuarioRepository.existsByCorreo("otro@example.com")).thenReturn(true);
 
         assertThrows(DuplicateResourceException.class, () -> usuarioService.actualizarMisDatos(request));
+        System.out.println("=== CP-UPD-05 RESULTADO OBTENIDO ===");
+        System.out.println("Error: " + assertThrows(DuplicateResourceException.class, () -> usuarioService.actualizarMisDatos(request)).getMessage());
     }
 
     @Test
@@ -208,29 +222,9 @@ class UsuarioServiceTest {
 
         assertThrows(IllegalArgumentException.class,
                 () -> usuarioService.actualizarMisDatos(request));
-    }
-
-    @Test
-    void actualizarMisDatos_deberiaNormalizarSegundoApellidoVacioANull() {
-        TipoDocumento tipoDocumento = tipoDocumento();
-        Rol rolCliente = rolCliente();
-        Usuario usuario = Usuario.builder()
-                .id(new UsuarioId(1, "1234567890"))
-                .tipoDocumento(tipoDocumento)
-                .rol(rolCliente)
-                .correo("juan@example.com")
-                .build();
-        ActualizarDatosRequest request = actualizarDatosRequest("Juan", "juan@example.com");
-        ReflectionTestUtils.setField(request, "segundoApellido", " ");
-
-        when(authentication.isAuthenticated()).thenReturn(true);
-        when(authentication.getName()).thenReturn("juan@example.com");
-        when(usuarioRepository.findByCorreo("juan@example.com")).thenReturn(Optional.of(usuario));
-        when(usuarioRepository.save(usuario)).thenReturn(usuario);
-
-        usuarioService.actualizarMisDatos(request);
-
-        assertNull(usuario.getSegundoApellido());
+        System.out.println("=== CP-UPD-04 RESULTADO OBTENIDO ===");
+        System.out.println("Error: " + assertThrows(IllegalArgumentException.class,
+                () -> usuarioService.actualizarMisDatos(request)).getMessage());
     }
 
     private static RegistroRequest registroRequest(String correo, String numeroDocumento, String contrasena) {

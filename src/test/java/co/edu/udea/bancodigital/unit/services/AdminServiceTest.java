@@ -96,6 +96,9 @@ class AdminServiceTest {
         assertEquals("Calle 123", item.getDireccion());
         assertEquals("CLIENTE", item.getRol());
         assertEquals(createdAt, item.getCreatedAt());
+        System.out.println("=== CP-ADM-01 RESULTADO OBTENIDO ===");
+        System.out.println("Clientes encontrados: " + response.size());
+        System.out.println("Primer cliente: " + response.get(0).getNombre() + " " + response.get(0).getPrimerApellido());
     }
 
     @Test
@@ -108,5 +111,8 @@ class AdminServiceTest {
 
         assertNotNull(response);
         assertTrue(response.isEmpty());
+        System.out.println("=== CP-ADM-02 RESULTADO OBTENIDO ===");
+        System.out.println("Clientes encontrados: " + response.size());
+        System.out.println("Lista vacía: " + response.isEmpty());
     }
 }

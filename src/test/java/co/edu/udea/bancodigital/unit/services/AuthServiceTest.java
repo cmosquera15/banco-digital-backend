@@ -47,7 +47,7 @@ class AuthServiceTest {
     private AuthService authService;
 
     @Test
-    @DisplayName("CP-LOG-01: login exitoso concede acceso")
+    @DisplayName("CP-LOG-01: login exitoso")
     void loginConCredencialesCorrectas_deberiaRetornarToken() {
         LoginRequest request = loginRequest("juan@example.com", "Abc123#@");
         Rol rol = new Rol();
@@ -75,6 +75,8 @@ class AuthServiceTest {
         assertEquals(0, usuario.getIntentosFallidos());
         assertNull(usuario.getBloqueadoHasta());
         verify(usuarioRepository).save(usuario);
+        System.out.println("=== CP-LOG-01 RESULTADO OBTENIDO ===");
+        System.out.println("Token: " + response.getToken());
     }
 
     @Test
@@ -90,14 +92,19 @@ class AuthServiceTest {
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenThrow(new BadCredentialsException("Credenciales incorrectas"));
 
-        assertThrows(BadCredentialsException.class, () -> authService.login(request));
+        BadCredentialsException exception = assertThrows(BadCredentialsException.class, () -> authService.login(request));
+        assertEquals("Credenciales incorrectas", exception.getMessage());
         assertEquals(1, usuario.getIntentosFallidos());
         assertNull(usuario.getBloqueadoHasta());
         verify(usuarioRepository).save(usuario);
+
+        System.out.println("=== CP-LOG-02 RESULTADO OBTENIDO ===");
+        System.out.println("Error: " + exception.getMessage());
+        System.out.println("Contador de intentos: " + usuario.getIntentosFallidos());
     }
 
     @Test
-    @DisplayName("CP-LOG-03: segundo intento fallido incrementa contador a 2")
+    @DisplayName("CP-LOG-03: 2 intentos fallidos")
     void segundoIntentoFallido_deberiaIncrementarContadorADos() {
         LoginRequest request = loginRequest("juan@example.com", "incorrecta");
         Usuario usuario = Usuario.builder()
@@ -109,10 +116,13 @@ class AuthServiceTest {
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenThrow(new BadCredentialsException("Credenciales incorrectas"));
 
-        assertThrows(BadCredentialsException.class, () -> authService.login(request));
+        BadCredentialsException exception = assertThrows(BadCredentialsException.class, () -> authService.login(request));
         assertEquals(2, usuario.getIntentosFallidos());
         assertNull(usuario.getBloqueadoHasta());
         verify(usuarioRepository).save(usuario);
+        System.out.println("=== CP-LOG-03 RESULTADO OBTENIDO ===");
+        System.out.println("Error: " + exception.getMessage());
+        System.out.println("Contador de intentos: " + usuario.getIntentosFallidos());  
     }
 
     @Test
@@ -128,9 +138,13 @@ class AuthServiceTest {
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenThrow(new BadCredentialsException("Credenciales incorrectas"));
 
-        assertThrows(LockedException.class, () -> authService.login(request));
+        LockedException exception = assertThrows(LockedException.class, () -> authService.login(request));
         assertEquals(3, usuario.getIntentosFallidos());
         verify(usuarioRepository).save(usuario);
+        System.out.println("=== CP-LOG-04 RESULTADO OBTENIDO ===");
+        System.out.println("Error: " + exception.getMessage());
+        System.out.println("Contador de intentos: " + usuario.getIntentosFallidos());
+        System.out.println("Cuenta bloqueada hasta: " + usuario.getBloqueadoHasta());
     }
 
     @Test
@@ -145,7 +159,45 @@ class AuthServiceTest {
 
         when(usuarioRepository.findByCorreo("juan@example.com")).thenReturn(Optional.of(usuario));
 
-        assertThrows(LockedException.class, () -> authService.login(request));
+        LockedException exception = assertThrows(LockedException.class, () -> authService.login(request));
+        System.out.println("=== CP-LOG-05 RESULTADO OBTENIDO ===");
+        System.out.println("Error: " + exception.getMessage());
+        System.out.println("Cuenta bloqueada hasta: " + usuario.getBloqueadoHasta());
+    }
+
+    @Test
+    @DisplayName("CP-LOG-06: login después del bloqueo")
+    void loginDespuesDelBloqueo_deberiaPermitirAccesoYResetearContador() {
+        LoginRequest request = loginRequest("juan@example.com", "Abc123#@");
+        Rol rol = new Rol();
+        rol.setId(2);
+        rol.setNombre("CLIENTE");
+        Usuario usuario = Usuario.builder()
+                .nombre("Juan")
+                .correo("juan@example.com")
+                .rol(rol)
+                .intentosFallidos(3)
+                .bloqueadoHasta(LocalDateTime.now().minusMinutes(1))
+                .build();
+
+        when(usuarioRepository.findByCorreo("juan@example.com")).thenReturn(Optional.of(usuario));
+        when(jwtService.generateToken(usuario)).thenReturn("jwt-token");
+
+        LoginResponse response = authService.login(request);
+
+        verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
+        assertEquals("jwt-token", response.getToken());
+        assertEquals("Bearer", response.getTipo());
+        assertEquals("Juan", response.getNombre());
+        assertEquals("juan@example.com", response.getCorreo());
+        assertEquals("CLIENTE", response.getRol());
+        assertEquals(0, usuario.getIntentosFallidos());
+        assertNull(usuario.getBloqueadoHasta());
+        verify(usuarioRepository).save(usuario);
+
+        System.out.println("=== CP-LOG-06 RESULTADO OBTENIDO ===");
+        System.out.println("Token: " + response.getToken());
+        System.out.println("Intentos fallidos reseteados: " + usuario.getIntentosFallidos());
     }
 
     @Test
@@ -155,7 +207,9 @@ class AuthServiceTest {
 
         when(usuarioRepository.findByCorreo("noexiste@example.com")).thenReturn(Optional.empty());
 
-        assertThrows(EntityNotFoundException.class, () -> authService.login(request));
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> authService.login(request));
+        System.out.println("=== CP-LOG-07 RESULTADO OBTENIDO ===");
+        System.out.println("Error: " + exception.getMessage());
     }
 
     private static LoginRequest loginRequest(String correo, String contrasena) {

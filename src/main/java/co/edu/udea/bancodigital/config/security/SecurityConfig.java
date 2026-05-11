@@ -8,6 +8,7 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -85,6 +86,7 @@ public class SecurityConfig {
 				.cors(cors -> cors.disable())
 				// Configura el manejo de sesiones como STATELESS (sin sesiones)
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+				.anonymous(anonym -> anonym.disable())
 				// Configura las autorizaciones
 				.authorizeHttpRequests(authz -> authz
 						// Rutas públicas - no requieren autenticación
@@ -95,10 +97,11 @@ public class SecurityConfig {
 						// Swagger UI
 						.requestMatchers("/swagger", "/swagger/**", "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**")
 						.permitAll()
-						// Rutas de administrador - requieren rol ADMIN
-						.requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+						// Rutas de administrador - requieren autenticación y el rol se valida en el método con @PreAuthorize
+						.requestMatchers("/api/v1/admin/**").authenticated()
 						// El resto de rutas requieren autenticación
 						.anyRequest().authenticated())
+				.formLogin(Customizer.withDefaults())
 				// Agrega el filtro JWT antes del filtro de Usuario-Contraseña
 				.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
 				// Configura el proveedor de autenticación
