@@ -131,7 +131,7 @@ public class CuentaService {
 
     @Transactional(readOnly = true)
     public List<ListarCuentasAdminResponse> listarCuentasAdmin() {
-        return cuentaRepository.findAll().stream()
+        return cuentaRepository.findAllForAdmin().stream()
                 .map(cuenta -> ListarCuentasAdminResponse.builder()
                         .idCuenta(cuenta.getIdCuenta())
                         .tipoDocumentoDueno(cuenta.getDueno().getTipoDocumento().getNombre())
