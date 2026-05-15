@@ -109,8 +109,10 @@ Produccion:
 Flyway esta habilitado y se ejecuta en arranque.
 
 - Carpeta de migraciones: `src/main/resources/db/migration`
-- Migracion actual: `V1__indexes_core.sql`
+- Migracion actual: `V12__drop_obsolete_transaction_date_indexes.sql`
 - Tabla de control en BD: `flyway_schema_history`
+- Las primeras migraciones documentan y ajustan un esquema que ya existia en Neon. No deben editarse si ya fueron aplicadas, porque Flyway valida checksums.
+- Para una base completamente vacia, se debe crear primero el esquema base o definir una migracion baseline consolidada antes de ejecutar las migraciones incrementales.
 
 Consulta util para validar estado:
 
@@ -160,7 +162,7 @@ El sistema usa JWT. El token se obtiene en `POST /api/v1/auth/login` y debe envi
 ## Base de datos
 
 - Motor: PostgreSQL en Neon (serverless)
-- Migraciones gestionadas con Flyway (V0 a V3 aplicadas)
+- Migraciones gestionadas con Flyway
 - Tablas: usuarios, cuentas, transacciones, roles, tipos_cuenta, estados_cuenta, tipos_documento, tipos_transaccion
 
 ## CI/CD
