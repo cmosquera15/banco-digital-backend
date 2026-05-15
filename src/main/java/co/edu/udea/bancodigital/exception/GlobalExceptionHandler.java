@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -102,6 +103,26 @@ public class GlobalExceptionHandler {
 				.build();
 
 		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(apiError);
+	}
+
+	/**
+	 * Maneja la excepción AuthenticationException.
+	 * Responde con HTTP 401 Unauthorized.
+	 */
+	@ExceptionHandler(AuthenticationException.class)
+	public ResponseEntity<ApiError> handleAuthenticationException(AuthenticationException ex, WebRequest request) {
+		String traceId = UUID.randomUUID().toString();
+		log.warn("AuthenticationException [traceId: {}] - {}", traceId, ex.getMessage(), ex);
+
+		ApiError apiError = ApiError.builder()
+				.errorCode("UNAUTHORIZED")
+				.message("No autenticado")
+				.details("Debe iniciar sesion para acceder a este recurso")
+				.traceId(traceId)
+				.timestamp(LocalDateTime.now())
+				.build();
+
+		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiError);
 	}
 
 	/**

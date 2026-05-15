@@ -32,6 +32,7 @@ public class SecurityConfig {
 
 	private final JwtService jwtService;
 	private final UserDetailsService userDetailsService;
+	private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
 
 	/**
 	 * Bean para codificar contraseñas.
@@ -79,13 +80,15 @@ public class SecurityConfig {
 	*/
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http){
-		http
+			http
 				// Deshabilita CSRF (no es necesario para REST API con tokens JWT)
 				.csrf(csrf -> csrf.disable()) //NOSONAR
 				// Deshabilita CORS (se configurará posteriormente)
 				.cors(cors -> cors.disable())
 				// Configura el manejo de sesiones como STATELESS (sin sesiones)
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+				.exceptionHandling(exception -> exception
+						.authenticationEntryPoint(restAuthenticationEntryPoint))
 				.anonymous(anonym -> anonym.disable())
 				// Configura las autorizaciones
 				.authorizeHttpRequests(authz -> authz
