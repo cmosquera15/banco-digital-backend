@@ -1,3 +1,5 @@
+[![CI Pipeline - Banco Digital Backend](https://github.com/FabricaEscuela2026-EAP13/banco-digital-backend/actions/workflows/ci.yml/badge.svg)](https://github.com/FabricaEscuela2026-EAP13/banco-digital-backend/actions/workflows/ci.yml)[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=FabricaEscuela2026-EAP13_banco-digital-backend&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=FabricaEscuela2026-EAP13_banco-digital-backend)[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=FabricaEscuela2026-EAP13_banco-digital-backend&metric=bugs)](https://sonarcloud.io/summary/new_code?id=FabricaEscuela2026-EAP13_banco-digital-backend)[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=FabricaEscuela2026-EAP13_banco-digital-backend&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=FabricaEscuela2026-EAP13_banco-digital-backend)[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=FabricaEscuela2026-EAP13_banco-digital-backend&metric=coverage)](https://sonarcloud.io/summary/new_code?id=FabricaEscuela2026-EAP13_banco-digital-backend)
+
 # Banco Digital Backend
 
 Backend REST para el proyecto Banco Digital (CodeFactory UdeA), construido con Spring Boot, PostgreSQL y seguridad JWT.
@@ -107,8 +109,10 @@ Produccion:
 Flyway esta habilitado y se ejecuta en arranque.
 
 - Carpeta de migraciones: `src/main/resources/db/migration`
-- Migracion actual: `V1__indexes_core.sql`
+- Migracion actual: `V12__drop_obsolete_transaction_date_indexes.sql`
 - Tabla de control en BD: `flyway_schema_history`
+- Las primeras migraciones documentan y ajustan un esquema que ya existia en Neon. No deben editarse si ya fueron aplicadas, porque Flyway valida checksums.
+- Para una base completamente vacia, se debe crear primero el esquema base o definir una migracion baseline consolidada antes de ejecutar las migraciones incrementales.
 
 Consulta util para validar estado:
 
@@ -158,7 +162,7 @@ El sistema usa JWT. El token se obtiene en `POST /api/v1/auth/login` y debe envi
 ## Base de datos
 
 - Motor: PostgreSQL en Neon (serverless)
-- Migraciones gestionadas con Flyway (V0 a V3 aplicadas)
+- Migraciones gestionadas con Flyway
 - Tablas: usuarios, cuentas, transacciones, roles, tipos_cuenta, estados_cuenta, tipos_documento, tipos_transaccion
 
 ## CI/CD

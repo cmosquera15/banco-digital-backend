@@ -1,0 +1,3 @@
+ALTER TABLE public.usuarios
+    ADD COLUMN IF NOT EXISTS intentos_fallidos INTEGER NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS bloqueado_hasta TIMESTAMP;

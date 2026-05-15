@@ -1,4 +1,4 @@
-package co.edu.udea.bancodigital;
+package co.edu.udea.bancodigital.integration;
 
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.Test;
@@ -14,7 +14,9 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
     "spring.datasource.password=",
     "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect",
     "spring.jpa.hibernate.ddl-auto=create-drop",
-    "spring.flyway.enabled=false"
+    "spring.flyway.enabled=false",
+    "app.jwt.secret=test-secret-test-secret-test-secret-test-secret",
+    "app.jwt.expiration=86400000"
 })
 class BancodigitalApplicationTests {
 

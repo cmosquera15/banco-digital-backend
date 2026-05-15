@@ -10,6 +10,7 @@ import co.edu.udea.bancodigital.models.entities.catalogs.EstadoCuenta;
 import co.edu.udea.bancodigital.models.entities.catalogs.TipoCuenta;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -43,19 +44,19 @@ public class Cuenta extends AuditableEntity {
 	@Column(name = "id_cuenta")
 	private UUID idCuenta;
 
-	@ManyToOne(optional = false)
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumns(value = {
-			@JoinColumn(name = "tipo_doc_dueno", referencedColumnName = "id_tipo_doc"),
-			@JoinColumn(name = "num_doc_dueno", referencedColumnName = "numero_documento")
+			@JoinColumn(name = "tipo_doc_dueno", referencedColumnName = "id_tipo_doc", nullable = false),
+			@JoinColumn(name = "num_doc_dueno", referencedColumnName = "numero_documento", nullable = false)
 	}, foreignKey = @ForeignKey(name = "fk_cuenta_usuario"))
 	private Usuario dueno;
 
-	@ManyToOne(optional = false)
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "id_tipo_cuenta", nullable = false, foreignKey = @ForeignKey(name = "fk_cuenta_tipo"))
 	private TipoCuenta tipoCuenta;
 
-	@ManyToOne(optional = false)
-	@JoinColumn(name = "id_estado_cuenta", nullable = false)
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@JoinColumn(name = "id_estado_cuenta", nullable = false, foreignKey = @ForeignKey(name = "fk_cuenta_estado"))
 	private EstadoCuenta estadoCuenta;
 
 	@Column(nullable = false, precision = 18, scale = 2)

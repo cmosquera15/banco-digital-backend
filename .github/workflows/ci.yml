@@ -3,21 +3,21 @@ name: CI Pipeline - Banco Digital Backend
 on:
   push:
     branches:
-      - develop
       - main
   pull_request:
     branches:
-      - develop
       - main
 
 jobs:
-  build-and-test:
-    name: Build and Test
+  build-test-sonar:
+    name: Build, Test and Sonar
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Java 21
         uses: actions/setup-java@v4
@@ -26,17 +26,25 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Build and run tests
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      - name: Build, Test, Coverage and Sonar
         env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           APP_JWT_SECRET: ${{ secrets.APP_JWT_SECRET }}
           SPRING_DATASOURCE_URL: ${{ secrets.SPRING_DATASOURCE_URL }}
           DATASOURCE_USERNAME: ${{ secrets.DATASOURCE_USERNAME }}
           DATASOURCE_PASSWORD: ${{ secrets.DATASOURCE_PASSWORD }}
-        run: mvn verify --no-transfer-progress "-Dspring.profiles.active=test"
-
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results
-          path: target/surefire-reports/
+        run: >
+          mvn clean verify sonar:sonar
+          -Dspring.profiles.active=test
+          -Dsonar.projectKey=FabricaEscuela2026-EAP13_banco-digital-backend
+          -Dsonar.organization=fabricaescuela2026-eap13
+          -Dsonar.host.url=https://sonarcloud.io
+          -Dsonar.login=$SONAR_TOKEN
+          -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml

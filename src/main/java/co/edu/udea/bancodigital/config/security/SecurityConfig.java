@@ -8,6 +8,7 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -31,6 +32,7 @@ public class SecurityConfig {
 
 	private final JwtService jwtService;
 	private final UserDetailsService userDetailsService;
+	private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
 
 	/**
 	 * Bean para codificar contraseñas.
@@ -54,7 +56,7 @@ public class SecurityConfig {
 	 * Bean para el AuthenticationManager.
 	 */
 	@Bean
-	public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+	public AuthenticationManager authenticationManager(AuthenticationConfiguration config){
 		return config.getAuthenticationManager();
 	}
 
@@ -70,15 +72,24 @@ public class SecurityConfig {
 	 * Configura la cadena de filtros de seguridad.
 	 * Define las rutas públicas, protegidas y de administrador.
 	 */
+
+	
+	/*Elimine throw Exception porque no se produce en ningun momento 
+	en el metodo (pq se deben comprobar directamente en el método si desean implementarlo).
+	En este momento commo esta si llega a fallar devuelve un RunTimeException
+	*/
 	@Bean
-	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		http
+	public SecurityFilterChain securityFilterChain(HttpSecurity http){
+			http
 				// Deshabilita CSRF (no es necesario para REST API con tokens JWT)
-				.csrf(csrf -> csrf.disable())
+				.csrf(csrf -> csrf.disable()) //NOSONAR
 				// Deshabilita CORS (se configurará posteriormente)
 				.cors(cors -> cors.disable())
 				// Configura el manejo de sesiones como STATELESS (sin sesiones)
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+				.exceptionHandling(exception -> exception
+						.authenticationEntryPoint(restAuthenticationEntryPoint))
+				.anonymous(anonym -> anonym.disable())
 				// Configura las autorizaciones
 				.authorizeHttpRequests(authz -> authz
 						// Rutas públicas - no requieren autenticación
@@ -89,10 +100,11 @@ public class SecurityConfig {
 						// Swagger UI
 						.requestMatchers("/swagger", "/swagger/**", "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**")
 						.permitAll()
-						// Rutas de administrador - requieren rol ADMIN
-						.requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+						// Rutas de administrador - requieren autenticación y el rol se valida en el método con @PreAuthorize
+						.requestMatchers("/api/v1/admin/**").authenticated()
 						// El resto de rutas requieren autenticación
 						.anyRequest().authenticated())
+				.formLogin(Customizer.withDefaults())
 				// Agrega el filtro JWT antes del filtro de Usuario-Contraseña
 				.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
 				// Configura el proveedor de autenticación

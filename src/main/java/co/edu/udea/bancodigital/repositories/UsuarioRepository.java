@@ -26,7 +26,11 @@ public interface UsuarioRepository extends JpaRepository<Usuario, UsuarioId> {
 	 * @param correo el correo a buscar
 	 * @return Optional con el usuario si existe
 	 */
-	@EntityGraph(attributePaths = { "rol", "tipoDocumento" })
+	@EntityGraph(attributePaths = {"rol", "tipoDocumento"})
+	@Query("""
+		SELECT u
+		FROM Usuario u
+		WHERE u.correo = :correo""")
 	Optional<Usuario> findByCorreo(String correo);
 
 	/**
@@ -35,6 +39,13 @@ public interface UsuarioRepository extends JpaRepository<Usuario, UsuarioId> {
 	 * @param correo el correo a verificar
 	 * @return true si existe, false en caso contrario
 	 */
+	@Query("""
+	        SELECT
+				CASE WHEN COUNT(u) > 0
+					THEN true ELSE false END
+			FROM Usuario u
+			WHERE u.correo = :correo
+	        """)
 	boolean existsByCorreo(String correo);
 
 	/**
@@ -43,6 +54,11 @@ public interface UsuarioRepository extends JpaRepository<Usuario, UsuarioId> {
 	 * @param rol el rol a filtrar
 	 * @return lista de usuarios con el rol especificado
 	 */
+	@Query("""
+	        SELECT u
+			FROM Usuario u
+			WHERE u.rol = :rol
+	        """)
 	List<Usuario> findAllByRol(Rol rol);
 
 	/**
@@ -53,10 +69,10 @@ public interface UsuarioRepository extends JpaRepository<Usuario, UsuarioId> {
 	 * @return lista de usuarios con el nombre de rol especificado
 	 */
 	@Query("""
-	    SELECT u FROM Usuario u
-	    JOIN FETCH u.rol r
-	    JOIN FETCH u.tipoDocumento td
-	    WHERE UPPER(r.nombre) = UPPER(:nombreRol)
-	    """)
+		SELECT u FROM Usuario u
+		JOIN FETCH u.rol r
+		JOIN FETCH u.tipoDocumento td
+		WHERE UPPER(r.nombre) = UPPER(:nombreRol)
+		""")
 	List<Usuario> findClientesConRol(@Param("nombreRol") String nombreRol);
 }

@@ -1,8 +1,9 @@
-package co.edu.udea.bancodigital.services;
+package co.edu.udea.bancodigital.unit.services;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -14,7 +15,11 @@ import co.edu.udea.bancodigital.models.entities.Usuario;
 import co.edu.udea.bancodigital.models.entities.catalogs.Rol;
 import co.edu.udea.bancodigital.models.entities.catalogs.TipoDocumento;
 import co.edu.udea.bancodigital.models.pks.UsuarioId;
+import co.edu.udea.bancodigital.repositories.CuentaRepository;
+import co.edu.udea.bancodigital.repositories.EstadoCuentaRepository;
+import co.edu.udea.bancodigital.repositories.TipoCuentaRepository;
 import co.edu.udea.bancodigital.repositories.UsuarioRepository;
+import co.edu.udea.bancodigital.services.UsuarioService;
 import jakarta.persistence.EntityManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -31,6 +36,15 @@ class AdminServiceTest {
     private UsuarioRepository usuarioRepository;
 
     @Mock
+    private CuentaRepository cuentaRepository;
+
+    @Mock
+    private TipoCuentaRepository tipoCuentaRepository;
+
+    @Mock
+    private EstadoCuentaRepository estadoCuentaRepository;
+
+    @Mock
     private PasswordEncoder passwordEncoder;
 
     @Mock
@@ -40,6 +54,7 @@ class AdminServiceTest {
     private UsuarioService usuarioService;
 
     @Test
+    @DisplayName("CP-ADM-01: Consulta exitosa")
     void listarClientes_deberiaMapearUsuariosCliente() {
         TipoDocumento tipoDocumento = mock(TipoDocumento.class);
         Rol rol = mock(Rol.class);
@@ -81,9 +96,13 @@ class AdminServiceTest {
         assertEquals("Calle 123", item.getDireccion());
         assertEquals("CLIENTE", item.getRol());
         assertEquals(createdAt, item.getCreatedAt());
+        System.out.println("=== CP-ADM-01 RESULTADO OBTENIDO ===");
+        System.out.println("Clientes encontrados: " + response.size());
+        System.out.println("Primer cliente: " + response.get(0).getNombre() + " " + response.get(0).getPrimerApellido());
     }
 
     @Test
+    @DisplayName("CP-ADM-02: Lista vacía")
     void listarClientes_deberiaRetornarListaVacia() {
         when(usuarioRepository.findClientesConRol("CLIENTE"))
             .thenReturn(List.of());
@@ -92,5 +111,8 @@ class AdminServiceTest {
 
         assertNotNull(response);
         assertTrue(response.isEmpty());
+        System.out.println("=== CP-ADM-02 RESULTADO OBTENIDO ===");
+        System.out.println("Clientes encontrados: " + response.size());
+        System.out.println("Lista vacía: " + response.isEmpty());
     }
 }

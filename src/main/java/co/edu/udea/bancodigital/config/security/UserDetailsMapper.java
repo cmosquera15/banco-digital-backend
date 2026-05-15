@@ -20,6 +20,10 @@ public class UserDetailsMapper {
 	 * @param usuario la entidad Usuario
 	 * @return un UserDetails con la información del usuario
 	 */
+	private UserDetailsMapper() {
+		// Constructor privado para evitar instanciación al ser una utility class
+	}
+
 	public static UserDetails mapToUserDetails(Usuario usuario) {
 		String rolNombre = usuario.getRol().getNombre().toUpperCase(Locale.ROOT);
 

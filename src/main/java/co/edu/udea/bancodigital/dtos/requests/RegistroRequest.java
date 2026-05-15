@@ -47,7 +47,7 @@ public class RegistroRequest {
     private String correo;
 
     @NotBlank(message = "La contraseña es obligatoria")
-    @Size(min = 10, max = 12, message = "La contraseña debe tener entre 10 y 12 caracteres")
+    @Size(min = 8, max = 16, message = "La contraseña debe tener entre 8 y 16 caracteres")
     @Pattern(regexp = "^(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).+$", message = "La contraseña debe incluir al menos 1 mayúscula, 1 número y 1 símbolo")
     private String contrasena;
 }

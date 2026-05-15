@@ -2,6 +2,7 @@ package co.edu.udea.bancodigital.models.entities;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.time.LocalDateTime;
 
 import co.edu.udea.bancodigital.models.entities.base.AuditableEntity;
 import co.edu.udea.bancodigital.models.entities.catalogs.Rol;
@@ -68,6 +69,13 @@ public class Usuario extends AuditableEntity {
 
 	@Column(name = "contrasena", nullable = false, length = 255)
 	private String contrasena;
+
+	@Column(name = "intentos_fallidos", nullable = false)
+	@Builder.Default
+	private Integer intentosFallidos = 0;
+
+	@Column(name = "bloqueado_hasta")
+	private LocalDateTime bloqueadoHasta;
 
 	@OneToMany(mappedBy = "dueno")
 	@Builder.Default

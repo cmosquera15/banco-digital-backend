@@ -80,6 +80,9 @@ public class CuentaService {
         String correo = authentication.getName();
 
         List<Cuenta> cuentas = cuentaRepository.findAllByDuenoCorreo(correo);
+        if (cuentas.isEmpty()) {
+            throw new EntityNotFoundException("Cuenta no disponible");
+        }
 
         List<DetalleCuenta> detalles = cuentas.stream()
                 .map(c -> DetalleCuenta.builder()
@@ -128,7 +131,7 @@ public class CuentaService {
 
     @Transactional(readOnly = true)
     public List<ListarCuentasAdminResponse> listarCuentasAdmin() {
-        return cuentaRepository.findAll().stream()
+        return cuentaRepository.findAllForAdmin().stream()
                 .map(cuenta -> ListarCuentasAdminResponse.builder()
                         .idCuenta(cuenta.getIdCuenta())
                         .tipoDocumentoDueno(cuenta.getDueno().getTipoDocumento().getNombre())
