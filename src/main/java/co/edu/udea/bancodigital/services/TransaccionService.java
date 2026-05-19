@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import co.edu.udea.bancodigital.dtos.responses.DetalleTransaccionResponse;
 import co.edu.udea.bancodigital.dtos.responses.HistorialTransaccionResponse;
+import co.edu.udea.bancodigital.dtos.responses.HistorialTransaccionesResponse;
 import co.edu.udea.bancodigital.exception.EntityNotFoundException;
 import co.edu.udea.bancodigital.models.entities.Cuenta;
 import co.edu.udea.bancodigital.models.entities.Transaccion;
@@ -32,7 +33,7 @@ public class TransaccionService {
     private final UsuarioRepository usuarioRepository;
 
     @Transactional(readOnly = true)
-    public Page<HistorialTransaccionResponse> consultarHistorial(
+    public HistorialTransaccionesResponse consultarHistorial(
             UUID idCuenta,
             LocalDate fechaInicio,
             LocalDate fechaFin,
@@ -44,24 +45,26 @@ public class TransaccionService {
 
         validarPropietarioCuenta(cuenta, usuarioAutenticado);
 
+        Page<HistorialTransaccionResponse> pagina;
+
         if (fechaInicio != null && fechaFin != null) {
             if (fechaInicio.isAfter(fechaFin)) {
                 throw new IllegalArgumentException("La fecha inicio no puede ser posterior a la fecha fin");
             }
-            return transaccionRepository.findHistorialByCuentaAndFechaHoraBetween(
+            pagina = transaccionRepository.findHistorialByCuentaAndFechaHoraBetween(
                     idCuenta,
                     fechaInicio.atStartOfDay(),
                     fechaFin.atTime(LocalTime.MAX),
                     pageable)
                     .map(this::toHistorialResponse);
-        }
-
-        if (fechaInicio != null || fechaFin != null) {
+        } else if (fechaInicio != null || fechaFin != null) {
             throw new IllegalArgumentException("Debe enviar fechaInicio y fechaFin para filtrar por rango");
+        } else {
+            pagina = transaccionRepository.findHistorialByCuenta(idCuenta, pageable)
+                    .map(this::toHistorialResponse);
         }
 
-        return transaccionRepository.findHistorialByCuenta(idCuenta, pageable)
-                .map(this::toHistorialResponse);
+        return construirRespuestaHistorial(pagina);
     }
 
     @Transactional(readOnly = true)
@@ -104,6 +107,29 @@ public class TransaccionService {
                 .cuentaOrigen(transaccion.getCuentaOrigen().getIdCuenta())
                 .cuentaDestino(transaccion.getCuentaDestino().getIdCuenta())
                 .estado(transaccion.getEstado().getNombre())
+                .build();
+    }
+
+    private HistorialTransaccionesResponse construirRespuestaHistorial(Page<HistorialTransaccionResponse> pagina) {
+        String mensaje;
+        boolean tieneDatos;
+
+        if (pagina.isEmpty()) {
+            mensaje = "No existen transacciones para esta cuenta";
+            tieneDatos = false;
+        } else {
+            mensaje = null;
+            tieneDatos = true;
+        }
+
+        return HistorialTransaccionesResponse.builder()
+                .transacciones(pagina.getContent())
+                .total(pagina.getTotalElements())
+                .pagina(pagina.getNumber())
+                .tamanoPagina(pagina.getSize())
+                .totalPaginas(pagina.getTotalPages())
+                .mensaje(mensaje)
+                .tieneDatos(tieneDatos)
                 .build();
     }
 

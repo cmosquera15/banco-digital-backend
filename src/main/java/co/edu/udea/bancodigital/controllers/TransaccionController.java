@@ -3,7 +3,6 @@ package co.edu.udea.bancodigital.controllers;
 import java.time.LocalDate;
 import java.util.UUID;
 
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -15,16 +14,18 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import co.edu.udea.bancodigital.dtos.responses.DetalleTransaccionResponse;
-import co.edu.udea.bancodigital.dtos.responses.HistorialTransaccionResponse;
+import co.edu.udea.bancodigital.dtos.responses.HistorialTransaccionesResponse;
 import co.edu.udea.bancodigital.services.TransaccionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/v1/transacciones")
 @RequiredArgsConstructor
+@Tag(name = "Historial de Transacciones", description = "Endpoints para consultar historial y detalles de transacciones")
 public class TransaccionController {
 
     private static final int MAX_PAGE_SIZE = 100;
@@ -39,7 +40,7 @@ public class TransaccionController {
     @ApiResponse(responseCode = "403", description = "La cuenta pertenece a otro usuario")
     @ApiResponse(responseCode = "404", description = "La cuenta no existe")
     @ApiResponse(responseCode = "500", description = "Error interno del servidor")
-    public ResponseEntity<Page<HistorialTransaccionResponse>> consultarHistorial(
+    public ResponseEntity<HistorialTransaccionesResponse> consultarHistorial(
             @RequestParam UUID cuentaId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin,
