@@ -24,12 +24,14 @@ import co.edu.udea.bancodigital.services.CuentaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/v1/cuentas")
 @RequiredArgsConstructor
+@Tag(name = "Cuentas Bancarias", description = "Endpoints para gestión de cuentas bancarias")
 public class CuentaController {
 
     private final CuentaService cuentaService;

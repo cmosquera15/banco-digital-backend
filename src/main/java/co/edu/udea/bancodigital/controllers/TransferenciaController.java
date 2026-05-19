@@ -13,12 +13,14 @@ import co.edu.udea.bancodigital.services.TransferenciaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/v1/transferencias")
 @RequiredArgsConstructor
+@Tag(name = "Transferencias", description = "Endpoints para realizar transferencias bancarias")
 public class TransferenciaController {
 
     private final TransferenciaService transferenciaService;

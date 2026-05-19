@@ -23,7 +23,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/v1/admin")
 @RequiredArgsConstructor
-@Tag(name = "Admin")
+@Tag(name = "Admin", description = "Endpoints para administración del sistema y gestión de clientes")
 public class AdminController {
 
     private final UsuarioService usuarioService;
